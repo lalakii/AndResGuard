@@ -54,6 +54,7 @@ class HexEncoding {
   /**
    * Encodes the remaining bytes of the provided {@link ByteBuffer} as a hexadecimal string.
    */
+  @SuppressWarnings("unused")
   public static String encodeRemaining(ByteBuffer data) {
     return encode(data.array(), data.arrayOffset() + data.position(), data.remaining());
   }

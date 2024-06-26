@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -56,6 +57,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
+
 import javax.crypto.EncryptedPrivateKeyInfo;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -85,23 +88,18 @@ public class ApkSignerTool {
     try {
       if ("sign".equals(cmd)) {
         sign(Arrays.copyOfRange(params, 1, params.length));
-        return;
       } else if ("verify".equals(cmd)) {
         verify(Arrays.copyOfRange(params, 1, params.length));
-        return;
       } else if ("help".equals(cmd)) {
         printUsage(HELP_PAGE_GENERAL);
-        return;
       } else if ("version".equals(cmd)) {
         System.out.println(VERSION);
-        return;
       } else {
         throw new ParameterException("Unsupported command: " + cmd + ". See --help for supported commands");
       }
     } catch (ParameterException | OptionsParser.OptionsException e) {
       System.err.println(e.getMessage());
       System.exit(1);
-      return;
     }
   }
 
@@ -110,7 +108,11 @@ public class ApkSignerTool {
       printUsage(HELP_PAGE_SIGN);
       return;
     }
-
+    StringBuilder sb = new StringBuilder();
+    for (String p : params) {
+      sb.append(p).append(" ");
+    }
+   // System.out.println(sb);
     File outputApk = null;
     File inputApk = null;
     boolean verbose = false;
@@ -127,66 +129,64 @@ public class ApkSignerTool {
     String optionOriginalForm = null;
     while ((optionName = optionsParser.nextOption()) != null) {
       optionOriginalForm = optionsParser.getOptionOriginalForm();
-      if (("help".equals(optionName)) || ("h".equals(optionName))) {
-        printUsage(HELP_PAGE_SIGN);
-        return;
-      } else if ("out".equals(optionName)) {
-        outputApk = new File(optionsParser.getRequiredValue("Output file name"));
-      } else if ("in".equals(optionName)) {
-        inputApk = new File(optionsParser.getRequiredValue("Input file name"));
-      } else if ("min-sdk-version".equals(optionName)) {
-        minSdkVersion = optionsParser.getRequiredIntValue("Mininimum API Level");
-        minSdkVersionSpecified = true;
-      } else if ("max-sdk-version".equals(optionName)) {
-        maxSdkVersion = optionsParser.getRequiredIntValue("Maximum API Level");
-      } else if ("v1-signing-enabled".equals(optionName)) {
-        v1SigningEnabled = optionsParser.getOptionalBooleanValue(true);
-      } else if ("v2-signing-enabled".equals(optionName)) {
-        v2SigningEnabled = optionsParser.getOptionalBooleanValue(true);
-      }  else if ("v3-signing-enabled".equals(optionName)) {
-        v3SigningEnabled = optionsParser.getOptionalBooleanValue(false);
-      } else if ("next-signer".equals(optionName)) {
-        if (!signerParams.isEmpty()) {
-          signers.add(signerParams);
-          signerParams = new SignerParams();
+        switch (optionName) {
+            case "help", "h" -> {
+                printUsage(HELP_PAGE_SIGN);
+                return;
+            }
+            case "out" -> outputApk = new File(optionsParser.getRequiredValue("Output file name"));
+            case "in" -> inputApk = new File(optionsParser.getRequiredValue("Input file name"));
+            case "min-sdk-version" -> {
+                minSdkVersion = optionsParser.getRequiredIntValue("Mininimum API Level");
+                minSdkVersionSpecified = true;
+            }
+            case "max-sdk-version" ->
+                    maxSdkVersion = optionsParser.getRequiredIntValue("Maximum API Level");
+            case "v1-signing-enabled" ->
+                    v1SigningEnabled = optionsParser.getOptionalBooleanValue(true);
+            case "v2-signing-enabled" ->
+                    v2SigningEnabled = optionsParser.getOptionalBooleanValue(true);
+            case "v3-signing-enabled" ->
+                    v3SigningEnabled = optionsParser.getOptionalBooleanValue(false);
+            case "next-signer" -> {
+                if (!signerParams.isEmpty()) {
+                    signers.add(signerParams);
+                    signerParams = new SignerParams();
+                }
+            }
+            case "ks" ->
+                    signerParams.keystoreFile = optionsParser.getRequiredValue("KeyStore file");
+            case "ks-key-alias" ->
+                    signerParams.keystoreKeyAlias = optionsParser.getRequiredValue("KeyStore key alias");
+            case "ks-pass" ->
+                    signerParams.keystorePasswordSpec = optionsParser.getRequiredValue("KeyStore password");
+            case "key-pass" ->
+                    signerParams.keyPasswordSpec = optionsParser.getRequiredValue("Key password");
+            case "v1-signer-name" ->
+                    signerParams.v1SigFileBasename = optionsParser.getRequiredValue("JAR signature file basename");
+            case "ks-type" ->
+                    signerParams.keystoreType = optionsParser.getRequiredValue("KeyStore type");
+            case "ks-provider-name" ->
+                    signerParams.keystoreProviderName = optionsParser.getRequiredValue("JCA KeyStore Provider name");
+            case "ks-provider-class" ->
+                    signerParams.keystoreProviderClass = optionsParser.getRequiredValue("JCA KeyStore Provider class name");
+            case "ks-provider-arg" ->
+                    signerParams.keystoreProviderArg = optionsParser.getRequiredValue("JCA KeyStore Provider constructor argument");
+            case "key" -> signerParams.keyFile = optionsParser.getRequiredValue("Private key file");
+            case "cert" ->
+                    signerParams.certFile = optionsParser.getRequiredValue("Certificate file");
+            case "v", "verbose" -> verbose = optionsParser.getOptionalBooleanValue(true);
+            default -> throw new ParameterException("Unsupported option: "
+                    + optionOriginalForm
+                    + ". See --help for supported"
+                    + " options.");
         }
-      } else if ("ks".equals(optionName)) {
-        signerParams.keystoreFile = optionsParser.getRequiredValue("KeyStore file");
-      } else if ("ks-key-alias".equals(optionName)) {
-        signerParams.keystoreKeyAlias = optionsParser.getRequiredValue("KeyStore key alias");
-      } else if ("ks-pass".equals(optionName)) {
-        signerParams.keystorePasswordSpec = optionsParser.getRequiredValue("KeyStore password");
-      } else if ("key-pass".equals(optionName)) {
-        signerParams.keyPasswordSpec = optionsParser.getRequiredValue("Key password");
-      } else if ("v1-signer-name".equals(optionName)) {
-        signerParams.v1SigFileBasename = optionsParser.getRequiredValue("JAR signature file basename");
-      } else if ("ks-type".equals(optionName)) {
-        signerParams.keystoreType = optionsParser.getRequiredValue("KeyStore type");
-      } else if ("ks-provider-name".equals(optionName)) {
-        signerParams.keystoreProviderName = optionsParser.getRequiredValue("JCA KeyStore Provider name");
-      } else if ("ks-provider-class".equals(optionName)) {
-        signerParams.keystoreProviderClass = optionsParser.getRequiredValue("JCA KeyStore Provider class name");
-      } else if ("ks-provider-arg".equals(optionName)) {
-        signerParams.keystoreProviderArg = optionsParser.getRequiredValue("JCA KeyStore Provider constructor argument");
-      } else if ("key".equals(optionName)) {
-        signerParams.keyFile = optionsParser.getRequiredValue("Private key file");
-      } else if ("cert".equals(optionName)) {
-        signerParams.certFile = optionsParser.getRequiredValue("Certificate file");
-      } else if (("v".equals(optionName)) || ("verbose".equals(optionName))) {
-        verbose = optionsParser.getOptionalBooleanValue(true);
-      } else {
-        throw new ParameterException("Unsupported option: "
-                                     + optionOriginalForm
-                                     + ". See --help for supported"
-                                     + " options.");
-      }
     }
     if (!signerParams.isEmpty()) {
       signers.add(signerParams);
     }
-    signerParams = null;
 
-    if (signers.isEmpty()) {
+      if (signers.isEmpty()) {
       throw new ParameterException("At least one signer must be specified");
     }
 
@@ -213,7 +213,9 @@ public class ApkSignerTool {
 
     List<ApkSigner.SignerConfig> signerConfigs = new ArrayList<>(signers.size());
     int signerNumber = 0;
-    try (PasswordRetriever passwordRetriever = new PasswordRetriever()) {
+    System.out.println("start sign apk files ------>");
+      PasswordRetriever passwordRetriever = new PasswordRetriever();
+      System.out.println("password retriever success");
       for (SignerParams signer : signers) {
         signerNumber++;
         signer.name = "signer #" + signerNumber;
@@ -225,7 +227,7 @@ public class ApkSignerTool {
           return;
         } catch (Exception e) {
           System.err.println("Failed to load signer \"" + signer.name + "\"");
-          e.printStackTrace();
+          e.fillInStackTrace();
           System.exit(2);
           return;
         }
@@ -251,9 +253,8 @@ public class ApkSignerTool {
         ).build();
         signerConfigs.add(signerConfig);
       }
-    }
 
-    if (outputApk == null) {
+      if (outputApk == null) {
       outputApk = inputApk;
     }
     File tmpOutputApk;
@@ -386,6 +387,8 @@ public class ApkSignerTool {
         System.out.println("Verifies");
         System.out.println("Verified using v1 scheme (JAR signing): " + result.isVerifiedUsingV1Scheme());
         System.out.println("Verified using v2 scheme (APK Signature Scheme v2): " + result.isVerifiedUsingV2Scheme());
+        System.out.println("Verified using v3 scheme (APK Signature Scheme v3): " + result.isVerifiedUsingV3Scheme());
+        System.out.println("Verified using v4 scheme (APK Signature Scheme v4): " + result.isVerifiedUsingV4Scheme());
         System.out.println("Number of signers: " + signerCerts.size());
       }
       if (printCerts) {
@@ -395,7 +398,7 @@ public class ApkSignerTool {
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         for (X509Certificate signerCert : signerCerts) {
           signerNumber++;
-          System.out.println("Signer #" + signerNumber + " certificate DN" + ": " + signerCert.getSubjectDN());
+          System.out.println("Signer #" + signerNumber + " certificate DN" + ": " + signerCert.getSubjectX500Principal());
           byte[] encodedCert = signerCert.getEncoded();
           System.out.println("Signer #"
                              + signerNumber
@@ -408,7 +411,7 @@ public class ApkSignerTool {
           if (verbose) {
             PublicKey publicKey = signerCert.getPublicKey();
             System.out.println("Signer #" + signerNumber + " key algorithm: " + publicKey.getAlgorithm());
-            int keySize = -1;
+            int keySize=-1;
             if (publicKey instanceof RSAKey) {
               keySize = ((RSAKey) publicKey).getModulus().bitLength();
             } else if (publicKey instanceof ECKey) {
@@ -445,7 +448,7 @@ public class ApkSignerTool {
       System.err.println("ERROR: " + error);
     }
 
-    @SuppressWarnings("resource") // false positive -- this resource is not opened here
+    // false positive -- this resource is not opened here
         PrintStream warningsOut = (warningsTreatedAsErrors) ? System.err : System.out;
     for (ApkVerifier.IssueWithParams warning : result.getWarnings()) {
       warningsEncountered = true;
@@ -478,13 +481,12 @@ public class ApkSignerTool {
     }
     if ((warningsTreatedAsErrors) && (warningsEncountered)) {
       System.exit(1);
-      return;
     }
   }
 
   private static void printUsage(String page) {
     try (BufferedReader in = new BufferedReader(new InputStreamReader(
-        ApkSignerTool.class.getResourceAsStream(page),
+            Objects.requireNonNull(ApkSignerTool.class.getResourceAsStream(page)),
         StandardCharsets.UTF_8
     ))) {
       String line;
@@ -598,15 +600,15 @@ public class ApkSignerTool {
         throws InvalidKeySpecException, NoSuchAlgorithmException {
       try {
         return KeyFactory.getInstance("RSA").generatePrivate(spec);
-      } catch (InvalidKeySpecException expected) {
+      } catch (InvalidKeySpecException ignored) {
       }
       try {
         return KeyFactory.getInstance("EC").generatePrivate(spec);
-      } catch (InvalidKeySpecException expected) {
+      } catch (InvalidKeySpecException ignored) {
       }
       try {
         return KeyFactory.getInstance("DSA").generatePrivate(spec);
-      } catch (InvalidKeySpecException expected) {
+      } catch (InvalidKeySpecException ignored) {
       }
       throw new InvalidKeySpecException("Not an RSA, EC, or DSA private key");
     }
@@ -690,7 +692,7 @@ public class ApkSignerTool {
 
       // 3. Load the PrivateKey and cert chain from KeyStore
       String keyAlias = null;
-      PrivateKey key = null;
+      PrivateKey key;
       try {
         if (keystoreKeyAlias == null) {
           // Private key entry alias not specified. Find the key entry contained in this
@@ -827,6 +829,7 @@ public class ApkSignerTool {
    * Indicates that there is an issue with command-line parameters provided to this tool.
    */
   private static class ParameterException extends Exception {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     ParameterException(String message) {

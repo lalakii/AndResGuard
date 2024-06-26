@@ -12,10 +12,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
+@SuppressWarnings("unused")
 public class Utils {
   public static boolean isPresent(String str) {
-    return str != null && str.length() > 0;
+    return str != null && !str.isEmpty();
   }
 
   public static boolean isBlank(String str) {
@@ -40,20 +40,20 @@ public class Utils {
   }
 
   public static boolean match(String str, HashSet<Pattern> patterns) {
-    if (patterns == null) {
-      return false;
-    }
-    for(Pattern p : patterns) {
-      Boolean isMatch = p.matcher(str).matches();
-      if (isMatch) return true;
+    if (patterns != null) {
+      for(Pattern p : patterns) {
+        boolean isMatch = p.matcher(str).matches();
+        if (isMatch) return true;
+      }
     }
     return false;
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   public static void cleanDir(File dir) {
     if (dir.exists()) {
       FileOperation.deleteDir(dir);
-      dir.mkdirs();
+       dir.mkdirs();
     }
   }
 
@@ -65,7 +65,7 @@ public class Utils {
       output = StringUtil.readInputStream(process.getInputStream());
       process.waitFor();
       if (process.exitValue() != 0) {
-        System.err.println(String.format("%s Failed! Please check your signature file.\n", cmd[0]));
+        System.err.printf("%s Failed! Please check your signature file.\n%n", cmd[0]);
         throw new RuntimeException(StringUtil.readInputStream(process.getErrorStream()));
       }
     } finally {
@@ -84,7 +84,7 @@ public class Utils {
       output = StringUtil.readInputStream(process.getInputStream());
       process.waitFor();
       if (process.exitValue() != 0) {
-        System.err.println(String.format("%s Failed! Please check your signature file.\n", argv[0]));
+        System.err.printf("%s Failed! Please check your signature file.\n%n", argv[0]);
         throw new RuntimeException(StringUtil.readInputStream(process.getErrorStream()));
       }
     } finally {
@@ -95,6 +95,7 @@ public class Utils {
     return output;
   }
 
+  @SuppressWarnings("StatementWithEmptyBody")
   private static void processOutputStreamInThread(Process process) throws IOException {
     InputStreamReader ir = new InputStreamReader(process.getInputStream());
     LineNumberReader input = new LineNumberReader(ir);
@@ -121,7 +122,7 @@ public class Utils {
       String pattern = matchInfo.pattern;
       String replacement = matchInfo.replacement;
 
-      buf.append(text.substring(start, textIndex));
+      buf.append(text, start, textIndex);
       buf.append(replacement);
 
       start = textIndex + pattern.length();
@@ -171,16 +172,7 @@ public class Utils {
       return false;
     }
 
-    private static class MatchInfo {
-      final String pattern;
-      final String replacement;
-      final int textIndex;
-
-      MatchInfo(String pattern, String replacement, int textIndex) {
-        this.pattern = pattern;
-        this.replacement = replacement;
-        this.textIndex = textIndex;
-      }
+    private record MatchInfo(String pattern, String replacement, int textIndex) {
     }
   }
 }

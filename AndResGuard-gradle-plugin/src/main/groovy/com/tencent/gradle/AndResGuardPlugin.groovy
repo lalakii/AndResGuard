@@ -17,8 +17,6 @@ class AndResGuardPlugin implements Plugin<Project> {
   void apply(Project project) {
     project.apply plugin: 'com.google.osdetector'
     project.extensions.create('andResGuard', AndResGuardExtension)
-    project.extensions.add("sevenzip", new ExecutorExtension("sevenzip"))
-
     project.afterEvaluate {
       def android = project.extensions.android
       createTask(project, USE_APK_TASK_NAME)
@@ -38,7 +36,6 @@ class AndResGuardPlugin implements Plugin<Project> {
         createTask(project, flavorName)
       }
 
-      project.extensions.findByName("sevenzip").loadArtifact(project)
     }
   }
 

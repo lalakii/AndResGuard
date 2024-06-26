@@ -1,0 +1,51 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                url = localRepo
+            }
+        }
+        publications {
+            release(MavenPublication) {
+                from components.java
+                pom {
+                    name = aarId
+                    artifactId = aarId
+                    groupId = groupID
+                    version = versionName
+                    description = 'proguard resource for Android by wechat team. 迁移到Gradle 8+'
+                    url = 'https://github.com/lalakii/AndResGuard'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            name = 'lalakii'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/lalakii/AndResGuard.git'
+                        url = 'https://github.com/lalakii/AndResGuard'
+                    }
+                    organization {
+                        name = "lalaki.cn"
+                        url = "https://github.com/lalakii"
+                    }
+                }
+            }
+        }
+    }
+}
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+signing {
+    useGpgCmd()
+    sign publishing.publications
+}

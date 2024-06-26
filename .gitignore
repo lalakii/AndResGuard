@@ -1,7 +1,8 @@
 # Built application files
 *.apk
 *.ap_
-
+.github
+.idea
 # Files for the Dalvik VM
 *.dex
 
@@ -18,7 +19,6 @@ build/
 /*/build/
 *.iml
 /*/*.iml
-.idea
 /*/.idea/
 
 # Local configuration file (sdk path, etc)
@@ -40,3 +40,6 @@ node_modules/
 classes
 AndResGuard-example/true
 final.apk
+*.asc
+/build
+.kotlin

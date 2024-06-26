@@ -25,8 +25,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class ZipRODirectory extends AbstractDirectory {
-  private ZipFile mZipFile;
-  private String mPath;
+  private final ZipFile mZipFile;
+  private final String mPath;
 
   public ZipRODirectory(String zipFileName) throws DirectoryException {
     this(zipFileName, "");
@@ -61,7 +61,7 @@ public class ZipRODirectory extends AbstractDirectory {
   }
 
   @Override
-  protected AbstractDirectory createDirLocal(String name) throws DirectoryException {
+  protected AbstractDirectory createDirLocal(String name) {
     throw new UnsupportedOperationException();
   }
 
@@ -75,7 +75,7 @@ public class ZipRODirectory extends AbstractDirectory {
   }
 
   @Override
-  protected OutputStream getFileOutputLocal(String name) throws DirectoryException {
+  protected OutputStream getFileOutputLocal(String name) {
     throw new UnsupportedOperationException();
   }
 
