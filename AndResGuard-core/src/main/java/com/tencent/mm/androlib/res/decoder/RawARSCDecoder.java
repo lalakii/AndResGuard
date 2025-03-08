@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 
 /**
@@ -47,7 +49,7 @@ public class RawARSCDecoder {
 
   private static HashMap<Integer, Set<String>> mExistTypeNames;
 
-  private final CountingInputStream mCountIn;
+  private final BoundedInputStream mCountIn;
 
   private ExtDataInput mIn;
   private Header mHeader;
@@ -60,8 +62,8 @@ public class RawARSCDecoder {
   private ResPackage[] mPkgs;
   private int mResId;
 
-  private RawARSCDecoder(InputStream arscStream) throws AndrolibException, IOException {
-    arscStream = mCountIn = new CountingInputStream(arscStream);
+  private RawARSCDecoder(InputStream arscStream) throws IOException {
+    arscStream = mCountIn =  BoundedInputStream.builder().setInputStream(arscStream).get();
     mIn = new ExtDataInput(new LEDataInputStream(arscStream));
     mExistTypeNames = new HashMap<>();
   }
@@ -382,10 +384,10 @@ public class RawARSCDecoder {
     public final short type;
     public final int headerSize;
     public final int chunkSize;
-    public final int startPosition;
-    public final int endPosition;
+    public final long startPosition;
+    public final long endPosition;
 
-    public Header(short type, int headerSize, int chunkSize, int headerStart) {
+    public Header(short type, int headerSize, int chunkSize, long headerStart) {
       this.type = type;
       this.headerSize = headerSize;
       this.chunkSize = chunkSize;
@@ -393,9 +395,9 @@ public class RawARSCDecoder {
       this.endPosition = headerStart + chunkSize;
     }
 
-    public static Header read(ExtDataInput in, CountingInputStream countIn) throws IOException {
+    public static Header read(ExtDataInput in, BoundedInputStream countIn) throws IOException {
       short type;
-      int start = countIn.getCount();
+      long start = countIn.getCount();
       try {
         type = in.readShort();
       } catch (EOFException ex) {

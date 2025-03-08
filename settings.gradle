@@ -1,2 +1,17 @@
-include ':AndResGuard-core', ':AndResGuard-gradle-plugin', ':AndResGuard-cli'
-include 'SevenZip'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        google()
+        maven { url = "https://www.jitpack.io" }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        google()
+        maven { url = "https://www.jitpack.io" }
+    }
+}
+include(':AndResGuard-gradle-plugin', ':AndResGuard-core', ':SevenZip', ':app')
