@@ -39,7 +39,7 @@ public class Md5Util {
     }
 
     public static String bytesToHexString(byte[] src) {
-        if (src.length <= 0) {
+        if (src.length == 0) {
             return "";
         }
         StringBuilder stringBuilder = new StringBuilder(src.length);

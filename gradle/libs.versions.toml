@@ -1,0 +1,21 @@
+[versions]
+commonsIo = "2.18.0"
+kotlin = "2.1.10"
+gradle = "8.9.0"
+appcompat = "1.7.0"
+zip4j = "2.11.5"
+junit = "4.13.2"
+
+[libraries]
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+commons-io = { module = "commons-io:commons-io", version.ref = "commonsIo" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "gradle" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+lalaki-central = { id = "cn.lalaki.central", version = "1.2.8" }
+lalaki-andresguard = { id = "cn.lalaki.AndResGuard", version = "1.7.3-final" }

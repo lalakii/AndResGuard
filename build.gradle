@@ -1,52 +1,51 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-  repositories {
-    google()
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:4.1.2'
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-    classpath 'com.ofg:uptodate-gradle-plugin:1.6.2'
-  }
+// 像这样配置插件也可以
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//        google()
+//    }
+//    dependencies {
+//        classpath "cn.lalaki.AndResGuard:cn.lalaki.AndResGuard.gradle.plugin:1.7.3-final"
+//    }
+//}
+plugins {
+    // AndResGuard 推荐这样配置
+    // id "cn.lalaki.AndResGuard" version "${ANDRESGUARD_VERSION}" apply false
+    alias(libs.plugins.lalaki.andresguard) apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.lalaki.central) apply false
 }
-
 allprojects {
-  repositories {
-    google()
-    jcenter()
-  }
-  tasks.withType(JavaCompile) {
-    sourceCompatibility = rootProject.ext.javaVersion
-    targetCompatibility = rootProject.ext.javaVersion
-  }
-
-  tasks.withType(GroovyCompile) {
-    sourceCompatibility = rootProject.ext.javaVersion
-    targetCompatibility = rootProject.ext.javaVersion
-  }
+    tasks.withType(JavaCompile).configureEach {
+        sourceCompatibility = rootProject.ext.javaVersion
+        targetCompatibility = rootProject.ext.javaVersion
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+    tasks.withType(GroovyCompile) configureEach {
+        sourceCompatibility = rootProject.ext.javaVersion
+        targetCompatibility = rootProject.ext.javaVersion
+    }
+    tasks.withType(Javadoc).configureEach {
+        options {
+            addStringOption("Xdoclint:none", "-quiet")
+            encoding "UTF-8"
+            charSet "UTF-8"
+            links "https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/"
+        }
+    }
 }
-
+def outputDir = new File(rootProject.layout.projectDirectory.asFile.canonicalPath, "build")
+tasks.register("clean", Delete) {
+    delete(outputDir)
+}
 ext {
-  javaVersion = JavaVersion.VERSION_1_8
-
-  GROUP = 'com.tencent.mm'
-  VERSION_NAME = "${ANDRESGUARD_VESSION}"
-
-  POM_PACKAGING = "pom"
-  POM_DESCRIPTION = "Android Resource Proguard Core Lib"
-
-  POM_URL = "https://github.com/shwenzhang/AndResGuard"
-  POM_SCM_URL = "https://github.com/shwenzhang/AndResGuard.git"
-  POM_ISSUE_URL = 'https://github.com/shwenzhang/AndResGuard/issues'
-
-  POM_LICENCE_NAME = "Apache-2.0"
-  POM_LICENCE_URL = " http://www.apache.org/licenses/"
-  POM_LICENCE_DIST = "repo"
-
-  POM_DEVELOPER_ID = "Tencent Wechat"
-  POM_DEVELOPER_NAME = "Tencent Wechat, Inc."
-
-  BINTRAY_LICENCE = ["Apache-2.0"]
-  BINTRAY_ORGANIZATION = "wemobiledev"
+    POM_PACKAGING = "pom"
+    POM_DESCRIPTION = "AndResGuard Unofficial"
+    javaVersion = JavaVersion.VERSION_21
+    versionName = ANDRESGUARD_VERSION
+    groupID = "cn.lalaki.AndResGuard"
+    localPath = outputDir.canonicalPath
+    localRepo = "D:\\repo\\"
 }
+//by lalaki.cn

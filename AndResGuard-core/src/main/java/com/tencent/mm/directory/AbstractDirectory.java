@@ -39,7 +39,7 @@ public abstract class AbstractDirectory implements Directory {
       return mFiles;
     }
 
-    Set<String> files = new LinkedHashSet<String>(mFiles);
+    Set<String> files = new LinkedHashSet<>(mFiles);
     for (Map.Entry<String, ? extends Directory> dir : getAbstractDirs().entrySet()) {
       for (String path : dir.getValue().getFiles(true)) {
         files.add(dir.getKey() + separator + path);
@@ -85,7 +85,7 @@ public abstract class AbstractDirectory implements Directory {
 
   @Override
   public Map<String, Directory> getDirs(boolean recursive) throws UnsupportedOperationException {
-    return new LinkedHashMap<String, Directory>(getAbstractDirs(recursive));
+    return new LinkedHashMap<>(getAbstractDirs(recursive));
   }
 
   @Override
@@ -184,7 +184,7 @@ public abstract class AbstractDirectory implements Directory {
       return mDirs;
     }
 
-    Map<String, AbstractDirectory> dirs = new LinkedHashMap<String, AbstractDirectory>(mDirs);
+    Map<String, AbstractDirectory> dirs = new LinkedHashMap<>(mDirs);
     for (Map.Entry<String, AbstractDirectory> dir : getAbstractDirs().entrySet()) {
       for (Map.Entry<String, AbstractDirectory> subdir : dir.getValue().getAbstractDirs(true).entrySet()) {
         dirs.put(dir.getKey() + separator + subdir.getKey(), subdir.getValue());
@@ -224,7 +224,7 @@ public abstract class AbstractDirectory implements Directory {
 
   abstract protected void removeFileLocal(String name);
 
-  private class ParsedPath {
+  private static class ParsedPath {
     public String dir;
     public String subpath;
 
@@ -234,7 +234,7 @@ public abstract class AbstractDirectory implements Directory {
     }
   }
 
-  private class SubPath {
+  private static class SubPath {
     public AbstractDirectory dir;
     public String path;
 

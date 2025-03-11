@@ -1,19 +1,15 @@
-apply plugin: 'groovy'
-
-version rootProject.ext.VERSION_NAME
-group rootProject.ext.GROUP
-
+plugins{
+    id "groovy"
+}
+apply from: "../publish.gradle"
 dependencies {
-  compile gradleApi()
-  compile localGroovy()
-  //compile group: 'com.tencent.mm', name: 'AndResGuard-core', version: version
-  compile 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
-  compile project(':AndResGuard-core')
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation project(":AndResGuard-core")
 }
-
-repositories {
-  mavenCentral()
+ext {
+    aarId = POM_ARTIFACT_ID
+    versionName = rootProject.ext.versionName
+    groupID = rootProject.ext.groupID
+    localPath = rootProject.ext.localPath
 }
-
-apply from: rootProject.file('gradle/java-artifacts.gradle')
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')

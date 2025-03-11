@@ -58,4 +58,4 @@ public class TypedValue {
   public static final int TYPE_NULL = 0x00;
 
   public static final int TYPE_STRING = 0x03;
-};
+}

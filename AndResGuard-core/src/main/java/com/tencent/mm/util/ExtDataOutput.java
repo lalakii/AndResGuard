@@ -11,10 +11,9 @@ public class ExtDataOutput extends DataOutputDelegate {
   }
 
   public void writeIntArray(int[] array) throws IOException {
-    int length = array.length;
-    for (int i = 0; i < length; i++) {
-      writeInt(array[i]);
-    }
+      for (int j : array) {
+          writeInt(j);
+      }
   }
 
   public void writeBytes(ExtDataInput in, int length) throws IOException {
