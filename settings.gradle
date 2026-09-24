@@ -1,2 +1,0 @@
-include ':AndResGuard-core', ':AndResGuard-gradle-plugin', ':AndResGuard-cli'
-include 'SevenZip'

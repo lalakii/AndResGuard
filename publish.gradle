@@ -1,0 +1,64 @@
+import java.nio.charset.StandardCharsets
+
+apply plugin: "java"
+apply plugin: "cn.lalaki.central"
+publishing {
+    repositories {
+        mavenLocal()
+    }
+    afterEvaluate {
+        publications {
+            release(MavenPublication) {
+                from components.java
+                pom {
+                    name = artId
+                    artifactId = artId
+                    groupId = groupID
+                    version = versionName
+                    description = "proguard resource for Android by wechat team. 已将 AndResGuard 迁移到 Gradle 8+"
+                    url = "https://github.com/lalakii/AndResGuard"
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            name = "lalakii"
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:https://github.com/lalakii/AndResGuard.git"
+                        url = "https://github.com/lalakii/AndResGuard"
+                    }
+                    organization {
+                        name = "lalaki.cn"
+                        url = "https://github.com/lalakii"
+                    }
+                    issueManagement {
+                        system = "Github"
+                        url = "https://github.com/shwenzhang/AndResGuard/issues"
+                    }
+                }
+            }
+        }
+    }
+}
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    withSourcesJar()
+    withJavadocJar()
+}
+tasks.withType(Javadoc).configureEach {
+    options {
+        addStringOption("Xdoclint:none", "-quiet")
+        encoding StandardCharsets.UTF_8.name()
+        charSet StandardCharsets.UTF_8.name()
+        links "https://docs.oracle.com/en/java/javase/${javaVersion}/docs/api/"
+    }
+}
+centralPortalPlus {
+    tokenXml = uri("D:\\user_token.xml")
+}

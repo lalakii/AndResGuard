@@ -22,6 +22,8 @@ class AndResGuardExtension {
   String sourceApk
   String sourceBuildType
   String sourceFlavor
+  boolean delMetaInf
+  boolean onlyV3V4Sign
 
   AndResGuardExtension() {
     use7zip = false

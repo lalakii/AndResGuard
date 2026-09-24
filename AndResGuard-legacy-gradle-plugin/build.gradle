@@ -1,0 +1,9 @@
+apply from: "../publish.gradle"
+dependencies {
+    implementation project(":AndResGuard-gradle-plugin")
+}
+ext {
+    artId = POM_ARTIFACT_ID
+    versionName = rootProject.ext.versionName
+    groupID = LEGACY_GROUP_ID
+}

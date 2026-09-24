@@ -9,6 +9,7 @@ import com.tencent.mm.resourceproguard.Configuration;
 import com.tencent.mm.util.FileOperation;
 import com.tencent.mm.util.TypedValue;
 import com.tencent.mm.util.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -18,7 +19,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
@@ -56,7 +56,7 @@ public class ApkDecoder {
       Path relativePath = resPath.relativize(path);
       Path dest = destPath.resolve(relativePath);
 
-      System.out.printf("copy res file not in resources.arsc file:%s\n", relativePath.toString());
+      System.out.printf("copy res file not in resources.arsc file:%s\n", relativePath);
       FileOperation.copyFileUsingStream(path.toFile(), dest.toFile());
     }
   }
@@ -131,12 +131,11 @@ public class ApkDecoder {
       if (!patterns.isEmpty()) {
         for (Entry<String, Integer> entry : mCompressData.entrySet()) {
           String name = entry.getKey();
-          for (Iterator<Pattern> it = patterns.iterator(); it.hasNext(); ) {
-            Pattern p = it.next();
-            if (p.matcher(name).matches()) {
-              mCompressData.put(name, TypedValue.ZIP_DEFLATED);
+            for (Pattern p : patterns) {
+                if (p.matcher(name).matches()) {
+                    mCompressData.put(name, TypedValue.ZIP_DEFLATED);
+                }
             }
-          }
         }
       }
     }
@@ -150,7 +149,7 @@ public class ApkDecoder {
     return mOutDir;
   }
 
-  public void setOutDir(File outDir) throws AndrolibException {
+  public void setOutDir(File outDir) {
     mOutDir = outDir;
   }
 
@@ -187,7 +186,7 @@ public class ApkDecoder {
       ensureFilePath();
       // read the resources.arsc checking for STORED vs DEFLATE compression
       // this will determine whether we compress on rebuild or not.
-      System.out.printf("decoding resources.arsc\n");
+      System.out.print("decoding resources.arsc\n");
       RawARSCDecoder.decode(apkFile.getDirectory().getFileInput("resources.arsc"));
       ResPackage[] pkgs = ARSCDecoder.decode(apkFile.getDirectory().getFileInput("resources.arsc"), this);
 
@@ -200,7 +199,7 @@ public class ApkDecoder {
 
   class ResourceFilesVisitor extends SimpleFileVisitor<Path> {
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
       mRawResourceFiles.add(file);
       return FileVisitResult.CONTINUE;
     }

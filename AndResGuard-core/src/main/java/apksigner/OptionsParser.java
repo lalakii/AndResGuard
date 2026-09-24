@@ -16,6 +16,7 @@
 
 package apksigner;
 
+import java.io.Serial;
 import java.util.Arrays;
 
 /**
@@ -192,6 +193,7 @@ class OptionsParser {
    * Indicates that an error was encountered while parsing command-line options.
    */
   public static class OptionsException extends Exception {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public OptionsException(String message) {
